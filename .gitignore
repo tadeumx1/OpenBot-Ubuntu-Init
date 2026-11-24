@@ -1,6 +1,7 @@
 # Never keep local installation state or credentials in the public setup kit.
 .env
 .env.*
+!overlay/.env.model-profiles.example
 .langchain/
 .copilotkit/
 .openbot-ubuntu-init-backup/
