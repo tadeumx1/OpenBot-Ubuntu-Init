@@ -9,7 +9,7 @@ This repository does **not** redistribute the OpenBot source code. It contains o
 - A model-mode switcher for ChatGPT Plan, Claude Plan, OpenCode Go, and a direct OpenAI API key.
 - Templates and Git/Docker ignore rules that keep `.env`, OAuth sessions, and CopilotKit data out of commits and Docker build contexts.
 
-It is an independent community setup, not an official CopilotKit release. This kit and OpenBot are MIT-licensed; see [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md).
+It is an independent community setup, not an official CopilotKit release. This kit and OpenBot are MIT-licensed; see [LICENSE](LICENSE), [NOTICE.md](NOTICE.md), and the [changelog](CHANGELOG.md).
 
 ## Quick start
 
