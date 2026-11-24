@@ -1,0 +1,77 @@
+name: Validate and release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate installer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check shell syntax
+        run: bash -n install.sh
+
+      - name: Apply the configuration to a fresh upstream checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="$RUNNER_TEMP/openbot"
+          git clone --depth=1 https://github.com/CopilotKit/OpenBot.git "$target"
+          XDG_DATA_HOME="$RUNNER_TEMP/xdg-data" bash ./install.sh "$target"
+
+          for required in \
+            Makefile \
+            .env.model-profiles.example \
+            desktop/openbot-local.desktop.in \
+            scripts/open-openbot.sh \
+            scripts/use-model.sh \
+            scripts/launch-openbot.sh \
+            scripts/install-ubuntu-launcher.sh; do
+            test -f "$target/$required"
+          done
+
+          grep -Fqx '.langchain/' "$target/.gitignore"
+          grep -Fqx '.copilotkit/' "$target/.gitignore"
+          grep -Fqx '.langchain' "$target/.dockerignore"
+          grep -Fqx '.copilotkit' "$target/.dockerignore"
+
+  release:
+    name: Publish GitHub Release
+    needs: validate
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build source package
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="openbot-ubuntu-init-${GITHUB_REF_NAME}.tar.gz"
+          tar --exclude-vcs --exclude='.env' --exclude='.langchain' --exclude='.copilotkit' -czf "$archive" .
+          sha256sum "$archive" >"${archive}.sha256"
+          echo "archive=$archive" >>"$GITHUB_OUTPUT"
+          echo "checksum=${archive}.sha256" >>"$GITHUB_OUTPUT"
+
+      - name: Create release and upload package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            "${{ steps.package.outputs.archive }}" \
+            "${{ steps.package.outputs.checksum }}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes

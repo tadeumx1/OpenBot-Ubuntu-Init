@@ -2,7 +2,7 @@
 
 An unofficial, lightweight Ubuntu setup kit for [CopilotKit/OpenBot](https://github.com/CopilotKit/OpenBot).
 
-This repository does **not** redistribute the OpenBot source code. It contains only the Ubuntu overlay developed for a local source checkout:
+This repository does **not** redistribute the OpenBot source code. It contains only Ubuntu configuration files developed for a local source checkout:
 
 - A `Makefile` for starting, stopping, inspecting, and opening OpenBot.
 - A browser-based Ubuntu application-menu launcher with database readiness checks.
@@ -23,7 +23,7 @@ cd OpenBot
 bash ../OpenBot-Ubuntu-Init/install.sh .
 ```
 
-The installer only adds or replaces its own overlay files. Before replacing a different local copy, it makes a timestamped backup at `.openbot-ubuntu-init-backup/`.
+The installer only adds or replaces its own configuration files. Before replacing a different local copy, it makes a timestamped backup at `.openbot-ubuntu-init-backup/`.
 
 Continue with OpenBot's normal source setup:
 
@@ -93,7 +93,7 @@ make open            # open a normal authorized browser tab
 
 ## Model modes
 
-Credentials are saved locally in `.env.model-profiles`, which the overlay ignores in Git. The active connection alone is written into `.env`.
+Credentials are saved locally in `.env.model-profiles`, which the configuration ignores in Git. The active connection alone is written into `.env`.
 
 | Mode | Save | Activate | Notes |
 | --- | --- | --- | --- |
@@ -106,7 +106,7 @@ Only one subscription-plan login can be active at once: ChatGPT Plan or Claude P
 
 ## Security
 
-The overlay adds these local-only paths to `.gitignore`:
+The configuration adds these local-only paths to `.gitignore`:
 
 - `.env` and `.env.*`
 - `.langchain/` for ChatGPT OAuth session data
@@ -117,7 +117,7 @@ It also adds `.langchain` and `.copilotkit` to `.dockerignore`, so OAuth renewal
 
 ## Updating from upstream
 
-Pull updates in the official OpenBot checkout as usual. Rerun this kit's installer to reapply the overlay, reviewing the timestamped backup if upstream changed one of the same files:
+Pull updates in the official OpenBot checkout as usual. Rerun this kit's installer to reapply the configuration, reviewing the timestamped backup if upstream changed one of the same files:
 
 ```sh
 cd OpenBot
@@ -125,6 +125,17 @@ git pull
 bash ../OpenBot-Ubuntu-Init/install.sh .
 ```
 
-## GitHub Actions and releases
+## CI and releases
 
-This kit does not contain GitHub Actions workflows and is intended as setup material, not a release distribution. Its repository has Actions disabled, so commits and tags do not run CI or release jobs.
+GitHub Actions validates the installer on pushes to `main`, pull requests, and version tags. A tag
+starting with `v` also creates a GitHub Release containing a source package and SHA-256 checksum.
+
+To publish a release:
+
+```sh
+git tag -a v0.1.0 -m "v0.1.0"
+git push origin v0.1.0
+```
+
+The release workflow runs the installer validation first. If it passes, it publishes
+`openbot-ubuntu-init-v0.1.0.tar.gz` and its `.sha256` checksum as release assets.
