@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=OpenBot
+Comment=Start and open the local OpenBot workspace
+Exec=@OPENBOT_ROOT@/scripts/launch-openbot.sh
+Icon=@OPENBOT_ROOT@/app/src/assets/openbot-logo.png
+Terminal=false
+Categories=Utility;
+Keywords=AI;Assistant;Agent;OpenBot;
+StartupNotify=true
